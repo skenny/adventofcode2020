@@ -1,8 +1,8 @@
 input = []
 with open('day3-input', 'r') as input_file:
-    input = [v.strip() for v in input_file.readlines()]
+    input = [l.strip() for l in input_file.readlines()]
 
-def traverse(h, v):
+def traverse(dX, dY):
     x = 0
     y = 0
     tree_count = 0
@@ -11,8 +11,8 @@ def traverse(h, v):
         c = row[x % len(row)]
         if c == "#":
             tree_count += 1
-        x += h
-        y += v
+        x += dX
+        y += dY
     return tree_count
 
 def part1():
