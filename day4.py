@@ -13,7 +13,7 @@ with open('day4-input', 'r') as fin:
                 parts = part.split(":")
                 record[parts[0]] = parts[1]
 
-def day1():
+def part1():
     required_fields = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
     valid_count = 0
     for record in input:
@@ -25,4 +25,4 @@ def day1():
             valid_count += 1
     print("part 1: of", len(input), "records,", valid_count, "are valid passports")
 
-day1()
+part1()
