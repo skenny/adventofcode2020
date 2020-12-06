@@ -27,12 +27,18 @@ def sum(ints):
     return reduce(lambda total, group_count: total + group_count, ints)
 
 def run_tests():
-    test = lambda group, expected_count: print(group, "is", expected_count, "?", count_anyone_answers(group) == expected_count)
-    test(["abc"], 3)
-    test(["a","b","c"], 3)
-    test(["ab","ac"], 3)
-    test(["a","a","a","a"], 1)
-    test(["b"], 1)
+    test_groups = [["abc"], ["a","b","c"], ["ab","ac"], ["a","a","a","a"], ["b"]]
+    test = lambda label, reducer, group, expected_count: print(label, group, "=", expected_count, "?", reducer(group) == expected_count)
+    test("test any", count_anyone_answers, test_groups[0], 3)
+    test("test any", count_anyone_answers, test_groups[1], 3)
+    test("test any", count_anyone_answers, test_groups[2], 3)
+    test("test any", count_anyone_answers, test_groups[3], 1)
+    test("test any", count_anyone_answers, test_groups[4], 1)
+    test("test all", count_everyone_answers, test_groups[0], 3)
+    test("test all", count_everyone_answers, test_groups[1], 0)
+    test("test all", count_everyone_answers, test_groups[2], 1)
+    test("test all", count_everyone_answers, test_groups[3], 1)
+    test("test all", count_everyone_answers, test_groups[4], 1)
 
 def part1(groups):
     print("part 1", sum(map(count_anyone_answers, groups)))
