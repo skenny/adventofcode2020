@@ -5,7 +5,7 @@ def find_seat(input):
 
 def binary_search(path, min, max):
     for c in path:
-        mid = int((max - min) /2)
+        mid = int((max - min) / 2)
         if c in ['F', 'L']:
             max -= mid
         else:
