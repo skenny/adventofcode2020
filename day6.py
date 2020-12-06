@@ -20,8 +20,7 @@ def count_anyone_answers(group):
     return len(set("".join(group)))
 
 def count_everyone_answers(group):
-    group_sets = list(map(set, group))
-    return len(reduce(lambda total, group_set: total.intersection(group_set), group_sets[1:], group_sets[0]))
+    return len(reduce(lambda total_answers, person_answers: total_answers.intersection(set(person_answers)), group[1:], set(group[0])))
 
 def sum(ints):
     return reduce(lambda total, group_count: total + group_count, ints)
