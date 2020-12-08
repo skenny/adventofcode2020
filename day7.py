@@ -10,18 +10,19 @@ def read_input():
     with open(INPUT_FILE, "r") as fin:
         return fin.readlines()
 
-def parse_rules(input):
-    return [parse_rule(line) for line in input]
+def parse_rules(inputs):
+    return dict([parse_rule(input) for input in inputs])
 
-def parse_rule(description):
-    empty_matches = re.findall(INPUT_REGEX_EMPTY, description)
+def parse_rule(input):
+    empty_matches = re.findall(INPUT_REGEX_EMPTY, input)
     if len(empty_matches) > 0:
         return (empty_matches[0], [])
-    else:
-        non_empty_matches = re.findall(INPUT_REGEX_NON_EMPTY, description)[0]
-        bag = non_empty_matches[0]
-        contents = list(map(lambda t: (int(t[0]), t[1]), re.findall(INPUT_REGEX_NON_EMPTY_CONTENTS, non_empty_matches[1])))
-        return (bag, contents)
+
+    non_empty_matches = re.findall(INPUT_REGEX_NON_EMPTY, input)[0]
+    return (
+        non_empty_matches[0],
+        list(map(lambda tuple: (int(tuple[0]), tuple[1]), re.findall(INPUT_REGEX_NON_EMPTY_CONTENTS, non_empty_matches[1])))
+    )
 
 def count_bag_holders(target_bag, rules):
     bags_to_search = list(rules.keys())
@@ -42,7 +43,7 @@ def can_bag_hold_target_bag(bag, target_bag, rules):
     for inner_bag in inner_bags:
         if can_bag_hold_target_bag(inner_bag, target_bag, rules):
             return True
-            
+
     return False
 
 def count_inner_bags(bag, rules):
@@ -52,7 +53,7 @@ def count_inner_bags(bag, rules):
     return count
 
 def run_tests():
-    inputs = [
+    test_inputs = [
         "light red bags contain 1 bright white bag, 2 muted yellow bags.",
         "dark orange bags contain 3 bright white bags, 4 muted yellow bags.",
         "bright white bags contain 1 shiny gold bag.",
@@ -63,20 +64,18 @@ def run_tests():
         "faded blue bags contain no other bags.",
         "dotted black bags contain no other bags.",
     ]
-    rules = parse_rules(inputs)
-    rules_dict = dict(rules)
     
-    for i, input in enumerate(inputs):
-        print('{} -> {}'.format(input, rules[i]))
+    for input in test_inputs:
+        print('{} -> {}'.format(input, parse_rule(input)))
 
-    target_bag = "shiny gold"
-    print("test 1: a {} bag can be held by {} other bags".format(target_bag, count_bag_holders(target_bag, rules_dict)))
-    print("test 2: a {} bag must contain {} other bags".format(target_bag, count_inner_bags(target_bag, rules_dict)))
+    rules = parse_rules(test_inputs)
+    print("test 1:", count_bag_holders("shiny gold", rules))
+    print("test 2:", count_inner_bags("shiny gold", rules))
 
 def run_parts():
-    rules = dict(parse_rules(read_input()))
-    print("part 1", count_bag_holders("shiny gold", rules))
-    print("part 2", count_inner_bags("shiny gold", rules))
+    rules = parse_rules(read_input())
+    print("part 1:", count_bag_holders("shiny gold", rules))
+    print("part 2:", count_inner_bags("shiny gold", rules))
 
 run_tests()
 run_parts()
