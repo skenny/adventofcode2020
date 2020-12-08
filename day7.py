@@ -2,9 +2,9 @@ import re
 
 INPUT_FILE = "day7-input"
 
-INPUT_REGEX_EMPTY = r"(\w+ \w+) bags contain no other bags."
-INPUT_REGEX_NON_EMPTY = r"(\w+ \w+) bags contain (.+)"
-INPUT_REGEX_NON_EMPTY_CONTENTS = r"(\d) (\w+ \w+) bags?[.,]"
+INPUT_DESCRIPTOR_REGEX = r"(\w+ \w+) bags contain (.+)."
+INPUT_CONTENTS_REGEX = r"(\d) (\w+ \w+) bags?,?"
+INPUT_CONTENTS_EMPTY = "no other bags"
 
 def read_input():
     with open(INPUT_FILE, "r") as fin:
@@ -14,14 +14,16 @@ def parse_rules(inputs):
     return dict([parse_rule(input) for input in inputs])
 
 def parse_rule(input):
-    empty_matches = re.findall(INPUT_REGEX_EMPTY, input)
-    if len(empty_matches) > 0:
-        return (empty_matches[0], [])
+    match = re.match(INPUT_DESCRIPTOR_REGEX, input)
+    bag = match.group(1)
+    contents_str = match.group(2)
 
-    non_empty_matches = re.findall(INPUT_REGEX_NON_EMPTY, input)[0]
+    if contents_str == INPUT_CONTENTS_EMPTY:
+        return (bag, [])
+
     return (
-        non_empty_matches[0],
-        list(map(lambda tuple: (int(tuple[0]), tuple[1]), re.findall(INPUT_REGEX_NON_EMPTY_CONTENTS, non_empty_matches[1])))
+        bag,
+        list(map(lambda tuple: (int(tuple[0]), tuple[1]), re.findall(INPUT_CONTENTS_REGEX, contents_str)))
     )
 
 def count_bag_holders(target_bag, rules):
