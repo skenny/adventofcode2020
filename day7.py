@@ -26,6 +26,7 @@ def parse_rule(description):
 def count_bag_holders(target_bag, rules):
     bags_to_search = list(rules.keys())
     bags_to_search.remove(target_bag)
+
     count = 0
     for s in bags_to_search:
         if can_bag_hold_target_bag(s, target_bag, rules):
@@ -38,16 +39,17 @@ def can_bag_hold_target_bag(bag, target_bag, rules):
     if target_bag in inner_bags:
         return True
 
-    result = False
     for inner_bag in inner_bags:
-        result |= can_bag_hold_target_bag(inner_bag, target_bag, rules)
-    return result
+        if can_bag_hold_target_bag(inner_bag, target_bag, rules):
+            return True
+            
+    return False
 
 def count_inner_bags(bag, rules):
-    inner_bag_count = 0
+    count = 0
     for num, inner_bag in rules[bag]:
-        inner_bag_count += num + (num * count_inner_bags(inner_bag, rules))
-    return inner_bag_count
+        count += num + (num * count_inner_bags(inner_bag, rules))
+    return count
 
 def run_tests():
     inputs = [
