@@ -8,16 +8,20 @@ def parse_boot_code(input):
     boot_code = []
     for i in input:
         op, arg = i.strip().split(" ")
-        boot_code.append({ "op": op, "arg": int(arg), "executed": False})
+        boot_code.append({ "op": op, "arg": int(arg) })
     return boot_code
 
 def execute(boot_code):
     accumulator = 0
     instr_ptr = 0
+    loop = False
+
+    for instr in boot_code:
+        instr["executed"] = False
 
     while True:
         if instr_ptr < 0 or instr_ptr >= len(boot_code):
-            #print("instr_ptr is out of range: {} (boot code has {} instructions)".format(instr_ptr, len(boot_code)))
+            print("exit: instr_ptr is out of range: {} (0..{})".format(instr_ptr, len(boot_code) - 1))
             break
 
         instr = boot_code[instr_ptr]
@@ -27,6 +31,7 @@ def execute(boot_code):
 
         if executed:
             #print("already executed instruction {}; aborting...".format(instr_ptr))
+            loop = True
             break
         
         instr["executed"] = True
@@ -39,10 +44,25 @@ def execute(boot_code):
         elif (op == "nop"):
             instr_ptr += 1
 
-    return accumulator
+    return (accumulator, loop)
+
+def repair(boot_code):
+    for instr in boot_code:
+        if (instr["op"] == "nop"):
+            instr["op"] = "jmp"
+            result = execute(boot_code)
+            if not result[1]:
+                return result
+            instr["op"] = "nop"
+        if (instr["op"] == "jmp"):
+            instr["op"] = "nop"
+            result = execute(boot_code)
+            if not result[1]:
+                return result
+            instr["op"] = "jmp"
 
 def run_tests():
-    input = [
+    test_boot_code = parse_boot_code([
         "nop +0",
         "acc +1",
         "jmp +4",
@@ -52,14 +72,14 @@ def run_tests():
         "acc +1",
         "jmp -4",
         "acc +6",
-    ]
-    test_boot_code = parse_boot_code(input)
-    final_acc = execute(test_boot_code)
-    print("test", final_acc)
+    ])
+    print("test 1", execute(test_boot_code))
+    print("test 2", repair(test_boot_code))
 
 def run_parts():
     boot_code = parse_boot_code(read_input())
     print("part 1", execute(boot_code))
+    print("part 2", repair(boot_code))
 
 run_tests()
 run_parts()
