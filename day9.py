@@ -16,11 +16,9 @@ def find_invalid_value(values, preamble_len):
 
 def validate_value(preamble, value):
     for i in range(0, len(preamble)):
-        for j in range(i + 1, len(preamble)):
-            v1 = preamble[i]
-            v2 = preamble[j]
-            if v1 != v2 and v1 + v2 == value:
-                return True
+        v1 = preamble[i]
+        if value - v1 in preamble:
+            return True
     return False
 
 def find_contiguous_range(values, invalid_value):
