@@ -16,8 +16,7 @@ def find_invalid_value(values, preamble_len):
 
 def validate_value(preamble, value):
     for i in range(0, len(preamble)):
-        v1 = preamble[i]
-        if value - v1 in preamble:
+        if value - preamble[i] in preamble:
             return True
     return False
 
