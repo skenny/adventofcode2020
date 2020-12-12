@@ -10,7 +10,8 @@ def read_input(file):
     with open(file, "r") as fin:
         return [list(l.strip()) for l in fin.readlines()]
 
-def fill_seats(grid, seat_counter):
+def fill_seats(grid, occupied_seat_counter, occupied_threshold):
+    #print("fill_seats using", occupied_seat_counter, occupied_threshold)
     #print_grid(grid)
 
     new_grid = []
@@ -19,22 +20,18 @@ def fill_seats(grid, seat_counter):
     for i, row in enumerate(grid):
         new_row = []
         for j, col in enumerate(row):
-            occupied_adjacent = seat_counter(grid, i, j) #count_occupied_adjacent_seats(grid, i, j)
-            if col == EMPTY and occupied_adjacent == 0:
+            occupied_seats = occupied_seat_counter(grid, i, j) if not col == "." else 0
+            if col == EMPTY and occupied_seats == 0:
                 new_row.append(OCCUPIED)
                 num_seats_changed += 1
-            elif col == OCCUPIED and occupied_adjacent >= 4:
+            elif col == OCCUPIED and occupied_seats >= occupied_threshold:
                 new_row.append(EMPTY)
                 num_seats_changed += 1
             else:
                 new_row.append(col)
         new_grid.append(new_row)
 
-    #print_grid(new_grid)
     return (new_grid, num_seats_changed)
-
-def find_angle_between(x, y, x2, y2):
-    return (360 - ((math.atan2(y - y2, x2 - x) * 180 / math.pi) - 90)) % 360
 
 def count_occupied_seats(grid):
     return sum(list(map(lambda row: row.count(OCCUPIED), grid)))
@@ -42,7 +39,7 @@ def count_occupied_seats(grid):
 def count_occupied_adjacent_seats(grid, row, col):
     num_rows = len(grid)
     num_cols = len(grid[0])
-    offsets = range(-1, 2)
+    offsets = (-1, 0, 1)
 
     adjacent_seats = []
     for i in offsets:
@@ -54,17 +51,40 @@ def count_occupied_adjacent_seats(grid, row, col):
     
     return adjacent_seats.count(OCCUPIED)
 
+visible_seats_cache = {}
 def count_occupied_in_sight_seats(grid, row, col):
-    return 0
+    num_rows = len(grid)
+    num_cols = len(grid[0])
+
+    cache_key = (row, col)
+    if not visible_seats_cache.get(cache_key):
+        visible_seat_positions = []
+        for vector in [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]:
+            offset = 1
+            while True:
+                r, c = (row + vector[0] * offset, col + vector[1] * offset)
+                if not (0 <= r < num_rows and 0 <= c < num_cols):
+                    break
+                if grid[r][c] != ".":
+                    visible_seat_positions.append((r, c))
+                    break
+                offset += 1
+        visible_seats_cache[cache_key] = visible_seat_positions
+
+    visible_seats = []
+    for visible_seat_position in visible_seats_cache[cache_key]:
+        visible_seats.append(grid[visible_seat_position[0]][visible_seat_position[1]])
+
+    return visible_seats.count(OCCUPIED)
 
 def print_grid(grid):
     [print("".join(r)) for r in grid]
     print("-" * len(grid[0]))
 
-def adjust_seating(grid, seat_counter):
+def adjust_seating(grid, seat_counter, occupied_threshold):
     working_grid = [row.copy() for row in grid]
     while True:
-        new_grid, num_seats_changed = fill_seats(working_grid, seat_counter)
+        new_grid, num_seats_changed = fill_seats(working_grid, seat_counter, occupied_threshold)
         if num_seats_changed == 0:
             break
         working_grid = new_grid
@@ -72,8 +92,8 @@ def adjust_seating(grid, seat_counter):
 
 def run(label, input_file):
     grid = read_input(input_file)
-    print("{} 1: {}".format(label, adjust_seating(grid, count_occupied_adjacent_seats)))
-    print("{} 2: {}".format(label, adjust_seating(grid, count_occupied_in_sight_seats)))
+    print("{} 1: {}".format(label, adjust_seating(grid, count_occupied_adjacent_seats, 4)))
+    print("{} 2: {}".format(label, adjust_seating(grid, count_occupied_in_sight_seats, 5)))
 
 run("test", TEST_INPUT_FILE)
-#run("part", INPUT_FILE)
+run("part", INPUT_FILE)
