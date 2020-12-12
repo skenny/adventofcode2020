@@ -34,37 +34,19 @@ def fill_seats_1(grid):
 def count_occupied_seats(grid):
     return sum(list(map(lambda row: row.count(OCCUPIED), grid)))
 
-def count_occupied_adjacent_seats(grid, row_num, col_num):
-    row = grid[row_num]
+def count_occupied_adjacent_seats(grid, row, col):
     num_rows = len(grid)
-    num_cols = len(row)
+    num_cols = len(grid[0])
+    offsets = range(-1, 2)
 
     adjacent_seats = []
-
-    # previous row
-    if row_num > 0:
-        prev_row = grid[row_num - 1]
-        if col_num > 0:
-            adjacent_seats.append(prev_row[col_num - 1])
-        adjacent_seats.append(prev_row[col_num])
-        if col_num < num_cols - 1:
-            adjacent_seats.append(prev_row[col_num + 1])
-
-    # current row
-    if col_num > 0:
-        adjacent_seats.append(row[col_num - 1])
-    if col_num < num_cols - 1:
-        adjacent_seats.append(row[col_num + 1])
-
-    # next row
-    if row_num < num_rows - 1:
-        next_row = grid[row_num + 1]
-        if col_num > 0:
-            adjacent_seats.append(next_row[col_num - 1])
-        adjacent_seats.append(next_row[col_num])
-        if col_num < num_cols - 1:
-            adjacent_seats.append(next_row[col_num + 1])
-
+    for i in offsets:
+        r = row + i
+        for j in offsets:
+            c = col + j
+            if not (i == 0 and j == 0) and 0 <= r < num_rows and 0 <= c < num_cols:
+                adjacent_seats.append(grid[r][c])
+    
     return adjacent_seats.count(OCCUPIED)
 
 def print_grid(grid):
@@ -85,4 +67,4 @@ def run(label, input_file):
     print("{} 1: {}".format(label, part1(grid)))
 
 run("test", TEST_INPUT_FILE)
-run("part", INPUT_FILE)
+#run("part", INPUT_FILE)
