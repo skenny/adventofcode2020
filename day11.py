@@ -8,8 +8,8 @@ def read_input(file):
     with open(file, "r") as fin:
         return [list(l.strip()) for l in fin.readlines()]
 
-def fill_seats(grid):
-    print_grid(grid)
+def fill_seats_1(grid):
+    #print_grid(grid)
 
     new_grid = []
     num_seats_changed = 0
@@ -28,7 +28,7 @@ def fill_seats(grid):
                 new_row.append(col)
         new_grid.append(new_row)
 
-    print_grid(new_grid)
+    #print_grid(new_grid)
     return (new_grid, num_seats_changed)
 
 def count_occupied_seats(grid):
@@ -68,18 +68,17 @@ def count_occupied_adjacent_seats(grid, row_num, col_num):
     return adjacent_seats.count(OCCUPIED)
 
 def print_grid(grid):
-    #[print("".join(r)) for r in grid]
-    #print("-----")
-    pass
+    [print("".join(r)) for r in grid]
+    print("-" * len(grid[0]))
 
 def part1(grid):
-    # TODO copy grid
+    working_grid = [row.copy() for row in grid]
     while True:
-        new_grid, num_seats_changed = fill_seats(grid)
+        new_grid, num_seats_changed = fill_seats_1(working_grid)
         if num_seats_changed == 0:
             break
-        grid = new_grid
-    return count_occupied_seats(grid)
+        working_grid = new_grid
+    return count_occupied_seats(working_grid)
 
 def run(label, input_file):
     grid = read_input(input_file)
