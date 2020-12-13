@@ -24,7 +24,6 @@ def fill_seats(grid, occupied_seat_counter, occupied_threshold):
 
         for i, row in enumerate(working_grid):
             new_row = []
-
             for j, col in enumerate(row):
                 occupied_seats = 0
                 if not col == ".":
@@ -37,10 +36,7 @@ def fill_seats(grid, occupied_seat_counter, occupied_threshold):
                     num_seats_changed += 1
                 else:
                     new_row.append(col)
-
             new_grid.append(new_row)
-
-        print(iteration, num_seats_changed, count_occupied_grid_seats(working_grid))
 
         if num_seats_changed == 0:
             break
@@ -68,29 +64,22 @@ def count_occupied_adjacent_seats(grid, row, col):
     
     return adjacent_seats.count(OCCUPIED)
 
-visible_seats_cache = {}
 def count_occupied_in_sight_seats(grid, row, col):
     num_rows = len(grid)
     num_cols = len(grid[0])
 
-    cache_key = (row, col)
-    if not visible_seats_cache.get(cache_key):
-        visible_seat_positions = []
-        for vector in [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]:
-            offset = 1
-            while True:
-                r, c = (row + vector[0] * offset, col + vector[1] * offset)
-                if not (0 <= r < num_rows and 0 <= c < num_cols):
-                    break
-                if grid[r][c] != ".":
-                    visible_seat_positions.append((r, c))
-                    break
-                offset += 1
-        visible_seats_cache[cache_key] = visible_seat_positions
-
     visible_seats = []
-    for visible_seat_position in visible_seats_cache[cache_key]:
-        visible_seats.append(grid[visible_seat_position[0]][visible_seat_position[1]])
+    for vector in [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]:
+        offset = 1
+        while True:
+            r, c = (row + vector[0] * offset, col + vector[1] * offset)
+            if not (0 <= r < num_rows and 0 <= c < num_cols):
+                break
+            seat = grid[r][c]
+            if seat != ".":
+                visible_seats.append(seat)
+                break
+            offset += 1
 
     return visible_seats.count(OCCUPIED)
 
