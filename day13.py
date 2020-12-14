@@ -7,7 +7,7 @@ def read_input(file):
     with open(file, "r") as fin:
         return [l.strip() for l in fin.readlines()]
 
-def find_bus(earliest_departure_time, bus_ids):
+def part1(earliest_departure_time, bus_ids):
     min_time_difference = 99
     departure_bus = None
     for bus_id_str in bus_ids:
@@ -26,21 +26,14 @@ def part2(bus_ids):
     for i, bus_id in enumerate(bus_ids):
         if bus_id.isdigit():
             buses.append((i, int(bus_id)))
-    
+
     timestamp = 0
-    i = 0
-    step = buses[0][1]
-    while True:
-        if timestamp % 10000000 == 0: print(timestamp)
-        buses_matched = 0
-        for bus_i, bus in buses:
-            if (timestamp + bus_i) % bus != 0:
-                break
-            #print(timestamp, bus_i, bus)
-            buses_matched += 1
-        if buses_matched == len(buses):
-            break
-        timestamp += step
+    step = 1
+    for bus_i, bus in buses:
+        while not (timestamp + bus_i) % bus == 0:
+            timestamp += step
+        step = math.lcm(step, bus)
+        #print("match on", timestamp, bus_i, bus, "setting step to", step)
 
     return timestamp
 
@@ -55,7 +48,7 @@ def run(label, input_file):
     input = read_input(input_file)
     earliest_departure_time = int(input[0])
     bus_ids = input[1].split(",")
-    print("{} 1: {}".format(label, find_bus(earliest_departure_time, bus_ids)))
+    print("{} 1: {}".format(label, part1(earliest_departure_time, bus_ids)))
     print("{} 2: {}".format(label, part2(bus_ids)))
 
 tests()
