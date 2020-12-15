@@ -28,7 +28,7 @@ def play(numbers, stop_count):
         if i % 1000000 == 0:
             print("on turn", i, "the number spoken was", last_number_spoken)
 
-    print("took", time.time() - start_time, "ms")
+    print("took", time.time() - start_time, "seconds")
     return last_number_spoken
 
 print("test [0,3,6]; expecting 436, got", play([0, 3, 6], 2020))
