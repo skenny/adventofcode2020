@@ -4,16 +4,13 @@ def play(numbers, stop_count):
     start_time = time.time()
 
     number_turns = {}
-    turn_padding = len(str(stop_count))
-    numbers_read = 0
     last_number_spoken = None
 
     for i in range(stop_count):
         number_spoken = None
 
-        if numbers_read < len(numbers):
+        if i < len(numbers):
             number_spoken = numbers[i]
-            numbers_read += 1
         else:
             turns_read = number_turns[last_number_spoken]
             if len(turns_read) == 1:
