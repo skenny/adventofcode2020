@@ -18,10 +18,6 @@ def play(numbers, stop_count):
             else:
                 number_spoken = turns_read[-1] - turns_read[-2]
 
-        if number_spoken == None:
-            print("ERROR - no number spoken on turn {}; last number spoken was {}".format(i, last_number_spoken))
-            break
-
         number_turns.setdefault(number_spoken, []).append(i)
         last_number_spoken = number_spoken
 
@@ -40,4 +36,4 @@ print("test [3,2,1]; expecting 438, got", play([3, 2, 1], 2020))
 print("test [3,1,2]; expecting 1836, got", play([3, 1, 2], 2020))
 
 print("part 1", play([6,13,1,15,2,0], 2020))
-print("part 1", play([6,13,1,15,2,0], 30000000))
+print("part 2", play([6,13,1,15,2,0], 30000000))
