@@ -34,7 +34,7 @@ def apply_mask2(value, bit_mask):
             floating_indices.append(i)
 
     num_floating = len(floating_indices)
-    
+
     floating_permutations = []
     floating_permutations.append("".join("0" * num_floating))
     floating_permutations.append("".join("1" * num_floating))
@@ -44,16 +44,13 @@ def apply_mask2(value, bit_mask):
 
     masked_values = []
     for fp in floating_permutations:
-        #print(masked_bits, floating_indices, fp)
         for i, b in enumerate(list(fp)):
             masked_bits[floating_indices[i]] = b
         masked_values.append(bit_field_to_int("".join(masked_bits)))
-    
-    #print(masked_values)
 
     return masked_values
 
-def part1(program):
+def run_program(program, memory_updater):
     bit_mask = "0" * 36
     mem = {}
     for line in program:
@@ -64,28 +61,19 @@ def part1(program):
             if search_result:
                 address = int(search_result.group(1))
                 value = int(search_result.group(2))
-                mem[address] = apply_mask1(value, bit_mask)
+                memory_updater(mem, address, value, bit_mask)
     return sum(mem.values())
 
-def part2(program):
-    bit_mask = "0" * 36
-    mem = {}
-    for i, line in enumerate(program):
-        print(i, line)
-        if line.startswith("mask"):
-            bit_mask = line.split(" = ")[1]
-        if line.startswith("mem"):
-            search_result = re.search(r"mem\[(\d+)\] = (\d+)", line)
-            if search_result:
-                address = int(search_result.group(1))
-                value = int(search_result.group(2))
-                for address in apply_mask2(address, bit_mask):
-                    mem[address] = value
-    return sum(mem.values())
+def update_memory_address1(mem, address, value, bit_mask):
+    mem[address] = apply_mask1(value, bit_mask)
 
+def update_memory_address2(mem, address, value, bit_mask):
+    for addr in apply_mask2(address, bit_mask):
+        mem[addr] = value
+ 
 def run(label, input_file1, input_file2):
-    print("{} 1: {}".format(label, part1(read_input(input_file1))))
-    print("{} 2: {}".format(label, part2(read_input(input_file2))))
+    print("{} 1: {}".format(label, run_program(read_input(input_file1), update_memory_address1)))
+    print("{} 2: {}".format(label, run_program(read_input(input_file2), update_memory_address2)))
 
 run("test", TEST_INPUT_FILE_1, TEST_INPUT_FILE_2)
 run("part", INPUT_FILE, INPUT_FILE)
