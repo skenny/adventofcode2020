@@ -10,51 +10,38 @@ def read_input(file):
         return [l.strip() for l in fin.readlines()]
 
 def int_to_bit_field(i):
-    return [1 if digit == "1" else 0 for digit in bin(i)[2:]]
+    return bin(i)[2:].zfill(36)
 
 def bit_field_to_int(bits):
-    return int("".join(str(i) for i in bits), 2)
+    return int(bits, 2)
 
 def apply_mask1(value, bit_mask):
-    bit_value = list(reversed(int_to_bit_field(value)))
-    masked_bit_value = []
-
-    for i, mask_bit in enumerate(reversed(bit_mask)):
-        new_bit_value = bit_value[i] if i < len(bit_value) else 0
-        if mask_bit != "X":
-            new_bit_value = int(mask_bit)
-        masked_bit_value.insert(0, new_bit_value)
-
-    return bit_field_to_int(masked_bit_value)
+    bit_value = int_to_bit_field(value)
+    masked_bits = list(bit_value)
+    for i, mask_bit in enumerate(list(bit_mask)):
+        masked_bits[i] = mask_bit if mask_bit != "X" else bit_value[i]
+    return bit_field_to_int("".join(masked_bits))
 
 def apply_mask2(value, bit_mask):
-    bit_value = list(reversed(int_to_bit_field(value)))
-    masked_bit_value = []
+    bit_value = int_to_bit_field(value)
+    masked_bits = list(bit_value)
+    for i, mask_bit in enumerate(list(bit_mask)):
+        masked_bits[i] = mask_bit if mask_bit != "0" else bit_value[i]
+    masked = "".join(masked_bits)
 
-    for i, mask_bit in enumerate(reversed(bit_mask)):
-        new_bit_value = bit_value[i] if i < len(bit_value) else 0
-        if mask_bit != "0":
-            new_bit_value = mask_bit
-        masked_bit_value.insert(0, new_bit_value)
-
-    aaa = "".join(str(i) for i in masked_bit_value)
-    num_floating = aaa.count("X")
-
-    #print(masked_bit_value)
+    num_floating = masked.count("X")
     
     floating_permutations = []
-    floating_permutations.append(list("0" * num_floating))
-    floating_permutations.append(list("1" * num_floating))
+    floating_permutations.append("".join("0" * num_floating))
+    floating_permutations.append("".join("1" * num_floating))
     for i in range(1, num_floating):
-        base = "".join(["1"] * i).zfill(num_floating)
-        [floating_permutations.append(l) for l in list(itertools.permutations(base))]
-
-    #print(floating_permutations)
+        base = "".join("1" * i).zfill(num_floating)
+        [floating_permutations.append("".join(l)) for l in list(itertools.permutations(base))]
 
     masked_values = []
     for fp in floating_permutations:
-        address = aaa
-        for i in fp:
+        address = masked
+        for i in list(fp):
             address = address.replace("X", i, 1)
         masked_values.append(bit_field_to_int(address))
     
@@ -63,11 +50,11 @@ def apply_mask2(value, bit_mask):
     return masked_values
 
 def part1(program):
-    bit_mask = ['0'] * 36
+    bit_mask = "0" * 36
     mem = {}
     for line in program:
         if line.startswith("mask"):
-            bit_mask = list(line.split(" = ")[1])
+            bit_mask = line.split(" = ")[1]
         if line.startswith("mem"):
             search_result = re.search(r"mem\[(\d+)\] = (\d+)", line)
             if search_result:
@@ -77,11 +64,12 @@ def part1(program):
     return sum(mem.values())
 
 def part2(program):
-    bit_mask = ['0'] * 36
+    bit_mask = "0" * 36
     mem = {}
-    for line in program:
+    for i, line in enumerate(program):
+        print(i, line)
         if line.startswith("mask"):
-            bit_mask = list(line.split(" = ")[1])
+            bit_mask = line.split(" = ")[1]
         if line.startswith("mem"):
             search_result = re.search(r"mem\[(\d+)\] = (\d+)", line)
             if search_result:
