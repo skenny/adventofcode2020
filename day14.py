@@ -1,4 +1,5 @@
 import re
+import itertools
 
 INPUT_FILE = "day14-input"
 TEST_INPUT_FILE_1 = "day14-input-test"
@@ -27,8 +28,7 @@ def apply_mask1(value, bit_mask):
     return bit_field_to_int(masked_bit_value)
 
 def apply_mask2(value, bit_mask):
-    aaa = int_to_bit_field(value)
-    bit_value = list(reversed(aaa))
+    bit_value = list(reversed(int_to_bit_field(value)))
     masked_bit_value = []
 
     for i, mask_bit in enumerate(reversed(bit_mask)):
@@ -37,8 +37,28 @@ def apply_mask2(value, bit_mask):
             new_bit_value = mask_bit
         masked_bit_value.insert(0, new_bit_value)
 
+    aaa = "".join(str(i) for i in masked_bit_value)
+    num_floating = aaa.count("X")
+
+    #print(masked_bit_value)
+    
+    floating_permutations = []
+    floating_permutations.append(list("0" * num_floating))
+    floating_permutations.append(list("1" * num_floating))
+    for i in range(1, num_floating):
+        base = "".join(["1"] * i).zfill(num_floating)
+        [floating_permutations.append(l) for l in list(itertools.permutations(base))]
+
+    #print(floating_permutations)
+
     masked_values = []
-    # TODO generate all possible values by replacing Xs with 0/1
+    for fp in floating_permutations:
+        address = aaa
+        for i in fp:
+            address = address.replace("X", i, 1)
+        masked_values.append(bit_field_to_int(address))
+    
+    #print(masked_values)
 
     return masked_values
 
@@ -76,4 +96,4 @@ def run(label, input_file1, input_file2):
     print("{} 2: {}".format(label, part2(read_input(input_file2))))
 
 run("test", TEST_INPUT_FILE_1, TEST_INPUT_FILE_2)
-#run("part", INPUT_FILE)
+run("part", INPUT_FILE, INPUT_FILE)
