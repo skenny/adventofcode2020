@@ -33,14 +33,7 @@ def apply_mask2(value, bit_mask):
         if mask_bit == "X":
             floating_indices.append(i)
 
-    num_floating = len(floating_indices)
-
-    floating_permutations = []
-    floating_permutations.append("".join("0" * num_floating))
-    floating_permutations.append("".join("1" * num_floating))
-    for i in range(1, num_floating):
-        base = "".join("1" * i).zfill(num_floating)
-        [floating_permutations.append("".join(l)) for l in list(itertools.permutations(base))]
+    floating_permutations = yay_recursion(len(floating_indices))
 
     masked_values = []
     for fp in floating_permutations:
@@ -49,6 +42,15 @@ def apply_mask2(value, bit_mask):
         masked_values.append(bit_field_to_int("".join(masked_bits)))
 
     return masked_values
+
+def yay_recursion(n):
+    if n == 1:
+        return ["0", "1"]
+    perms = []
+    for i in yay_recursion(n - 1):
+        perms.append("0" + i)
+        perms.append("1" + i)
+    return perms
 
 def run_program(program, memory_updater):
     bit_mask = "0" * 36
@@ -75,5 +77,8 @@ def run(label, input_file1, input_file2):
     print("{} 1: {}".format(label, run_program(read_input(input_file1), update_memory_address1)))
     print("{} 2: {}".format(label, run_program(read_input(input_file2), update_memory_address2)))
 
+print(yay_recursion(1))
+print(yay_recursion(2))
+print(yay_recursion(3))
 run("test", TEST_INPUT_FILE_1, TEST_INPUT_FILE_2)
 run("part", INPUT_FILE, INPUT_FILE)
