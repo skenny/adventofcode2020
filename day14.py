@@ -25,11 +25,15 @@ def apply_mask1(value, bit_mask):
 def apply_mask2(value, bit_mask):
     bit_value = int_to_bit_field(value)
     masked_bits = list(bit_value)
+    floating_indices = []
     for i, mask_bit in enumerate(list(bit_mask)):
         masked_bits[i] = mask_bit if mask_bit != "0" else bit_value[i]
-    masked = "".join(masked_bits)
 
-    num_floating = masked.count("X")
+        # keep track of floating bit indexes for replacement later
+        if mask_bit == "X":
+            floating_indices.append(i)
+
+    num_floating = len(floating_indices)
     
     floating_permutations = []
     floating_permutations.append("".join("0" * num_floating))
@@ -40,10 +44,10 @@ def apply_mask2(value, bit_mask):
 
     masked_values = []
     for fp in floating_permutations:
-        address = masked
-        for i in list(fp):
-            address = address.replace("X", i, 1)
-        masked_values.append(bit_field_to_int(address))
+        #print(masked_bits, floating_indices, fp)
+        for i, b in enumerate(list(fp)):
+            masked_bits[floating_indices[i]] = b
+        masked_values.append(bit_field_to_int("".join(masked_bits)))
     
     #print(masked_values)
 
