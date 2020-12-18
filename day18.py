@@ -29,21 +29,21 @@ def evaluate_expr(expr, plus_first):
             # remove the "("
             operators.pop()
 
-            result = evaluate_simple_expr(nested_operands, nested_operators)
+            result = evaluate_simple_expr(nested_operands, nested_operators, plus_first)
             operands.append(result)
 
-    return evaluate_simple_expr(operands, operators)
+    return evaluate_simple_expr(operands, operators, plus_first)
 
-def evaluate_simple_expr(operands, operators):
+def evaluate_simple_expr(operands, operators, plus_first):
     lhs = None
     for operator in operators:
         if lhs == None:
             lhs = operands.pop(0)
         rhs = operands.pop(0)
-        lhs = evaluate_op(operator, lhs, rhs)
+        lhs = evaluate_op(operator, lhs, rhs, plus_first)
     return lhs
 
-def evaluate_op(op, lhs, rhs):
+def evaluate_op(op, lhs, rhs, plus_first):
     result = 0
     if op == "+":
         result = lhs + rhs
