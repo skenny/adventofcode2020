@@ -6,7 +6,7 @@ def read_input(file):
     with open(file, "r") as fin:
         return [l.strip() for l in fin.readlines()]
 
-def evaluate_expr(expr):
+def evaluate_expr(expr, plus_first):
     expr = expr.replace(' ', '')
 
     operands = []
@@ -15,14 +15,7 @@ def evaluate_expr(expr):
     for c in list(expr):
         if c.isdigit():
             operands.append(int(c))
-        elif c in ("+", "*"):
-            if len(operators) > 0 and operators.count("(") == 0:
-                lhs = operands.pop(0)
-                rhs = operands.pop(0)
-                operator = operators.pop(0)
-                operands.insert(0, evaluate_op(operator, lhs, rhs))
-            operators.append(c)
-        elif c == "(":
+        elif c in ("+", "*", "("):
             operators.append(c)
         elif c == ")":
             nested_operators = []
@@ -47,13 +40,15 @@ def evaluate_expr(expr):
                 else:
                     nested_operands.insert(0, result)
 
+    return evaluate_simple_expr(operands, operators)
+
+def evaluate_simple_expr(operands, operators):
     lhs = None
     for operator in operators:
         if lhs == None:
             lhs = operands.pop(0)
         rhs = operands.pop(0)
         lhs = evaluate_op(operator, lhs, rhs)
-        
     return lhs
 
 def evaluate_op(op, lhs, rhs):
@@ -65,7 +60,8 @@ def evaluate_op(op, lhs, rhs):
     #print("evaluating...", lhs, op, rhs, "=", result)
     return result
 
-def run_tests():
+def run_tests(plus_first):
+    print("plus first" if plus_first else "in order")
     for t in [
         "1 + 2 * 3 + 4 * 5 + 6", 
         "2 * 3 + (4 * 5)", 
@@ -73,12 +69,13 @@ def run_tests():
         "5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))", 
         "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2"
     ]:
-        print(t, "=", evaluate_expr(t))
+        print("\t{} = {}".format(t, evaluate_expr(t, plus_first)))
 
 def run(input_file):
     exprs = read_input(input_file)
-    sum = reduce(lambda total, expr: total + evaluate_expr(expr), exprs, 0)
-    print(sum)
+    print("part 1:", reduce(lambda total, expr: total + evaluate_expr(expr, False), exprs, 0))
+    print("part 2:", reduce(lambda total, expr: total + evaluate_expr(expr, True), exprs, 0))
 
-run_tests()
-run(INPUT_FILE)
+run_tests(False)
+run_tests(True)
+#run(INPUT_FILE)
