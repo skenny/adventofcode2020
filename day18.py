@@ -7,6 +7,7 @@ def read_input(file):
         return [l.strip() for l in fin.readlines()]
 
 def evaluate_expr(expr, plus_first):
+    #print("evaluating", expr, "(plus first)" if plus_first else "")
     expr = expr.replace(' ', '')
 
     operands = []
@@ -34,29 +35,34 @@ def evaluate_expr(expr, plus_first):
     return evaluate_simple_expr(operands, operators, plus_first)
 
 def evaluate_simple_expr(operands, operators, plus_first):
-    lhs = None
+    if (plus_first):
+        i = 0
+        while operators.count("+") > 0:
+            if operators[i] == "+":
+                operator = operators.pop(i)
+                lhs = operands.pop(i)
+                rhs = operands.pop(i)
+                operands.insert(i, evaluate_op(operator, lhs, rhs))
+            else:
+                i += 1
+
+    lhs = operands.pop(0)
     for operator in operators:
-        if lhs == None:
-            lhs = operands.pop(0)
         rhs = operands.pop(0)
-        lhs = evaluate_op(operator, lhs, rhs, plus_first)
+        lhs = evaluate_op(operator, lhs, rhs)
+    
     return lhs
 
-def evaluate_op(op, lhs, rhs, plus_first):
-    result = 0
-    if op == "+":
-        result = lhs + rhs
-    elif op == "*":
-        result = lhs * rhs
-    #print("evaluating...", lhs, op, rhs, "=", result)
-    return result
+def evaluate_op(op, lhs, rhs):
+    return lhs * rhs if op == "*" else lhs + rhs
 
 def run_tests(plus_first):
     print("plus first" if plus_first else "in order")
     for t in [
         "1 + 2 * 3 + 4 * 5 + 6", 
+        "1 + (2 * 3) + (4 * (5 + 6))",
         "2 * 3 + (4 * 5)", 
-        "5 + (8 * 3 + 9 + 3 * 4 * 3)", 
+        "5 + (8 * 3 + 9 + 3 * 4 * 3)",
         "5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))", 
         "((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2"
     ]:
@@ -69,4 +75,4 @@ def run(input_file):
 
 run_tests(False)
 run_tests(True)
-run(INPUT_FILE)
+#run(INPUT_FILE)
