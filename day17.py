@@ -72,6 +72,21 @@ class PocketDimension:
         copy_version.max_w = self.max_w
         return copy_version
 
+    def expanded_x_range(self):
+        return self.expand_range(self.min_x, self.max_x)
+
+    def expanded_y_range(self):
+        return self.expand_range(self.min_y, self.max_y)
+
+    def expanded_z_range(self):
+        return self.expand_range(self.min_z, self.max_z)
+
+    def expanded_w_range(self):
+        return self.expand_range(self.min_w, self.max_w)
+
+    def expand_range(self, min, max):
+        return range(min - 1, max + 2)
+
     def print(self):
         for w in range(self.min_w, self.max_w + 1):
             for z in range(self.min_z, self.max_z + 1):
@@ -97,10 +112,10 @@ def run(label, input_file):
 
         new_pocket_dimension = pocket_dimension.make_copy()
 
-        for x in range(pocket_dimension.min_x - 1, pocket_dimension.max_x + 2):
-            for y in range(pocket_dimension.min_y - 1, pocket_dimension.max_y + 2):
-                for z in range(pocket_dimension.min_z - 1, pocket_dimension.max_z + 2):
-                    for w in range(pocket_dimension.min_w - 1, pocket_dimension.max_w + 2):
+        for x in new_pocket_dimension.expanded_x_range():
+            for y in new_pocket_dimension.expanded_y_range():
+                for z in new_pocket_dimension.expanded_z_range():
+                    for w in new_pocket_dimension.expanded_w_range():
                         cube = pocket_dimension.get_cube(x, y, z, w)
                         num_active_neighbours = pocket_dimension.count_active_neighbours(x, y, z, w)
                         if cube == ACTIVE and num_active_neighbours not in (2, 3):
