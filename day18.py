@@ -57,7 +57,7 @@ def evaluate_op(op, lhs, rhs):
     return lhs * rhs if op == "*" else lhs + rhs
 
 def run_tests(plus_first):
-    print("plus first" if plus_first else "in order")
+    print("testing", "plus first" if plus_first else "in order")
     for t in [
         "1 + 2 * 3 + 4 * 5 + 6", 
         "1 + (2 * 3) + (4 * (5 + 6))",
@@ -75,4 +75,4 @@ def run(input_file):
 
 run_tests(False)
 run_tests(True)
-#run(INPUT_FILE)
+run(INPUT_FILE)
