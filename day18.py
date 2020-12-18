@@ -29,16 +29,8 @@ def evaluate_expr(expr, plus_first):
             # remove the "("
             operators.pop()
 
-            result = 0
-            while len(nested_operators) > 0:
-                lhs = nested_operands.pop(0)
-                rhs = nested_operands.pop(0)
-                operator = nested_operators.pop(0)
-                result = evaluate_op(operator, lhs, rhs)
-                if len(nested_operators) == 0:
-                    operands.append(result)
-                else:
-                    nested_operands.insert(0, result)
+            result = evaluate_simple_expr(nested_operands, nested_operators)
+            operands.append(result)
 
     return evaluate_simple_expr(operands, operators)
 
