@@ -20,15 +20,14 @@ def evaluate_expr(expr, plus_first):
         elif c == ")":
             nested_operators = []
             nested_operands = []
-            while operators[-1] != "(":
-                nested_operators.insert(0, operators.pop())
+            while True:
+                operator = operators.pop()
+                if operator == "(":
+                    break
+                nested_operators.insert(0, operator)
                 if len(nested_operands) == 0:
                     nested_operands.insert(0, operands.pop())
                 nested_operands.insert(0, operands.pop())
-
-            # remove the "("
-            operators.pop()
-
             result = evaluate_simple_expr(nested_operands, nested_operators, plus_first)
             operands.append(result)
 
@@ -70,4 +69,4 @@ def run(input_file):
 
 run_tests(False)
 run_tests(True)
-#run(INPUT_FILE)
+run(INPUT_FILE)
