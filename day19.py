@@ -45,10 +45,9 @@ def simplify(rules):
                         new_rule_spec = new_rule_spec + "+ "
                     elif rule_part.isdigit() and not int(rule_part) in rules_to_simplify:
                         simple_rule = rules_copy[int(rule_part)]
-                        if len(simple_rule) == 1:
-                            new_rule_spec += simple_rule + " "
-                        else:
-                            new_rule_spec += "(" + simple_rule + ") "
+                        if len(simple_rule) > 1:
+                            simple_rule = "(" + simple_rule + ")"
+                        new_rule_spec += simple_rule + " "
                     else:
                         new_rule_spec += rule_part + " "
                 rules_copy[rule_num] = new_rule_spec.strip()
