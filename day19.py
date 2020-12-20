@@ -35,19 +35,30 @@ def simplify(rules):
             rule_spec = rules_copy[rule_num]
             #print("{}: {}".format(rule_num, rule_spec))
             if not any(char.isdigit() for char in rule_spec):
-                #print("simple rule", rule_num, rule_spec)
+                #print("simple rule", rule_num) #, rule_spec)
                 rules_to_simplify.remove(rule_num)
             else:
                 new_rule_spec = ""
                 rule_parts = rule_spec.split(" ")
+                rule_part_references = list(filter(lambda c: c.isdigit(), rule_parts))
                 for i, rule_part in enumerate(rule_parts):
                     if rule_part.isdigit() and int(rule_part) == rule_num:
-                        new_rule_spec = new_rule_spec + "+ "
+                        if len(rule_part_references) > 1:
+                            new_rule_spec += rule_part + " "
+                        else:
+                            if int(rule_part) == 8:
+                                new_rule_spec = "({0})+ ".format(rules_copy[42])
+                                break
+                            if int(rule_part) == 11:
+                                new_rule_spec = "({0}) ({1}) | ({0}) ({0}) ({1}) ({1}) | ({0}) ({0}) ({0}) ({1}) ({1}) ({1}) | ({0}) ({0}) ({0}) ({0}) ({1}) ({1}) ({1}) ({1})".format(rules_copy[42], rules_copy[31])
+                                break
+                            raise "unexpected looping rule: " + rule_part
                     elif rule_part.isdigit() and not int(rule_part) in rules_to_simplify:
                         simple_rule = rules_copy[int(rule_part)]
-                        if len(simple_rule) > 1:
-                            simple_rule = "(" + simple_rule + ")"
-                        new_rule_spec += simple_rule + " "
+                        if len(simple_rule) == 1:
+                            new_rule_spec += simple_rule + " "
+                        else:
+                            new_rule_spec += "(" + simple_rule + ") "
                     else:
                         new_rule_spec += rule_part + " "
                 rules_copy[rule_num] = new_rule_spec.strip()
@@ -68,8 +79,8 @@ def run(label, input_file1, input_file2):
     print("{} 1: {}".format(label, count_valid_messages(rules, messages)))
 
     rules, messages = read_input(input_file2)
-    rules[8] = "42 | 42 8"         # simplifies to (42)+
-    rules[11] = "42 31 | 42 11 31" # simplifies to 42 (42 31)* 31
+    rules[8] = "42 | 42 8"
+    rules[11] = "42 31 | 42 11 31" # only apply + to (42 11 31), not (42 31 | 42 11 31)+
     print("{} 2: {}".format(label, count_valid_messages(rules, messages)))
 
 run("test", "day19-input-test", "day19-input-test-2")
