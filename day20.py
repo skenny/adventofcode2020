@@ -3,6 +3,7 @@ class Tile:
     def __init__(self, id, rows):
         self.id = id
         self.rows = rows
+        self.neighbours = set()
 
     def edges(self):
         edges = []
@@ -24,12 +25,11 @@ class Tile:
     def reverse_edge(self, edge):
         return edge[::-1]
 
-    def connects_with(self, other_tile):
+    def test_fit(self, other_tile):
         other_edges = other_tile.edges()
         for edge in self.edges():
             if edge in other_edges or self.reverse_edge(edge) in other_edges:
-                return True
-        return False
+                self.neighbours.add(other_tile)
 
 def read_input(file):
     with open(file, "r") as fin:
@@ -50,26 +50,22 @@ def read_input(file):
         tiles.append(Tile(tile_id, tile_rows))
         return tiles
 
-def find_corner_tiles(tiles):
-    tile_counts = {}
+def test_fit_tiles(tiles):
     for target_tile in tiles:
-        tile_counts[target_tile.id] = 0
         for test_tile in tiles:
-            if target_tile.id == test_tile.id:
-                continue
-            if target_tile.connects_with(test_tile):
-                tile_counts[target_tile.id] = tile_counts[target_tile.id] + 1
-    corner_tiles = []
-    prod = 1
-    for tile_id, connect_count in tile_counts.items():
-        if connect_count == 2:
-            corner_tiles.append(tile_id)
-            prod *= tile_id
-    return prod
+            if not target_tile.id == test_tile.id:
+                target_tile.test_fit(test_tile)
 
 def run(label, input_file):
     tiles = read_input(input_file)
-    print("{} 1: {}".format(label, find_corner_tiles(tiles)))
+    test_fit_tiles(tiles)
+
+    corner_product = 1
+    for tile in tiles:
+        if len(tile.neighbours) == 2:
+            corner_product *= tile.id
+
+    print("{} 1: {}".format(label, corner_product))
 
 run("test", "day20-input-test")
 run("part", "day20-input")
