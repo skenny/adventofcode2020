@@ -24,13 +24,19 @@ def process(foods):
         for allergen in unique_allergens:
             if allergen in allergen_ingredients:
                 continue
+            
             matching_foods = list(filter(lambda tuple: allergen in tuple[1], foods))
-            aaa = set(unique_ingredients)
+
+            possible_ingredients = set(unique_ingredients)
             for ingredients, allergens in matching_foods:
-                aaa = aaa.intersection(ingredients)
-            aaa -= set(allergen_ingredients.values())
-            if len(aaa) == 1:
-                allergen_ingredients[allergen] = list(aaa)[0]
+                possible_ingredients = possible_ingredients.intersection(ingredients)
+
+            # remove all ingredients we've already found the allergen for
+            possible_ingredients -= set(allergen_ingredients.values())
+
+            # if we've isolated the ingredient, track it
+            if len(possible_ingredients) == 1:
+                allergen_ingredients[allergen] = list(possible_ingredients)[0]
     
     return (allergen_ingredients, set(unique_ingredients) - set(allergen_ingredients.values()))
 
