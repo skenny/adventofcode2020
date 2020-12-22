@@ -1,3 +1,5 @@
+import time
+
 def read_input(file):
     player1_cards = []
     player2_cards = []
@@ -19,8 +21,8 @@ def play(player1_cards, player2_cards, recursive_combat_enabled):
 
     winner, winning_cards = play_game(1, player1_cards_copy, player2_cards_copy, recursive_combat_enabled)
 
-    print("\n== Post-game results ==")
-    print("Winner's deck: {}\n".format(", ".join(str(c) for c in winning_cards)))
+    #print("\n== Post-game results ==")
+    #print("Winner's deck: {}\n".format(", ".join(str(c) for c in winning_cards)))
     #print("Player 2's deck: {}".format(", ".join(str(c) for c in player2_cards)))
 
     score = 0
@@ -40,10 +42,12 @@ def play_game(game_num, player1_cards, player2_cards, recursive_combat_enabled):
 
         p1_cards_str = ", ".join(str(c) for c in player1_cards)
         p2_cards_str = ", ".join(str(c) for c in player2_cards)
+
         for prev_round_num, cards in prev_rounds.items():
             if cards[0] == p1_cards_str and cards[1] == p2_cards_str:
                 #print("Deck state repeats previous round, instant win for player 1!", prev_round_num)
                 return (1, player1_cards)
+        
         prev_rounds[round_num] = (p1_cards_str, p2_cards_str)
 
         #print("-- Round {} (Game {}) --".format(round_num, game_num))
@@ -59,13 +63,8 @@ def play_game(game_num, player1_cards, player2_cards, recursive_combat_enabled):
         round_winner = None
         if recursive_combat_enabled and p1 <= len(player1_cards) and p2 <= len(player2_cards):
             #print("Playing a sub-game to determine the winner...")
-
-            player1_cards_copy = player1_cards[:p1]
-            player2_cards_copy = player2_cards[:p2]
-            sub_game_winner, sub_game_winning_cards = play_game(game_num + 1, player1_cards_copy, player2_cards_copy, True)
-
+            sub_game_winner, sub_game_winning_cards = play_game(game_num + 1, player1_cards[:p1], player2_cards[:p2], True)
             #print("The winner of game {} is player {}!".format(game_num + 1, sub_game_winner))
-
             round_winner = sub_game_winner
         else:
             round_winner = 1 if p1 > p2 else 2
@@ -84,8 +83,10 @@ def play_game(game_num, player1_cards, player2_cards, recursive_combat_enabled):
 
 def run(label, input_file):
     player1_cards, player2_cards = read_input(input_file)
-    print("{} 1: {}".format(label, play(player1_cards, player2_cards, False)))
-    print("{} 2: {}".format(label, play(player1_cards, player2_cards, True)))
+    start1 = time.time()
+    print("{} 1: {} ({}s)".format(label, play(player1_cards, player2_cards, False), time.time() - start1))
+    start2 = time.time()
+    print("{} 2: {} ({}s)".format(label, play(player1_cards, player2_cards, True), time.time() - start2))
 
 run("test", "day22-input-test")
 run("part", "day22-input")
