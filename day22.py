@@ -31,7 +31,7 @@ def play(player1_cards, player2_cards, recursive_combat_enabled):
     return score
 
 def play_game(game_num, player1_cards, player2_cards, recursive_combat_enabled):
-    prev_rounds = {}
+    prev_rounds = []
     round_num = 0
     winner = None
 
@@ -40,19 +40,15 @@ def play_game(game_num, player1_cards, player2_cards, recursive_combat_enabled):
     while len(player1_cards) > 0 and len(player2_cards) > 0:
         round_num += 1
 
-        p1_cards_str = ", ".join(str(c) for c in player1_cards)
-        p2_cards_str = ", ".join(str(c) for c in player2_cards)
-
-        for prev_round_num, cards in prev_rounds.items():
-            if cards[0] == p1_cards_str and cards[1] == p2_cards_str:
-                #print("Deck state repeats previous round, instant win for player 1!", prev_round_num)
+        if recursive_combat_enabled:
+            if [player1_cards, player2_cards] in prev_rounds:
+                #print("Deck state repeats previous round, instant win for player 1!")
                 return (1, player1_cards)
-        
-        prev_rounds[round_num] = (p1_cards_str, p2_cards_str)
+            prev_rounds.append([player1_cards.copy(), player2_cards.copy()])
 
         #print("-- Round {} (Game {}) --".format(round_num, game_num))
-        #print("Player 1's deck: {}".format(p1_cards_str))
-        #print("Player 2's deck: {}".format(p2_cards_str))
+        #print("Player 1's deck: {}".format(", ".join(str(c) for c in player1_cards)))
+        #print("Player 2's deck: {}".format(", ".join(str(c) for c in player2_cards)))
 
         p1 = player1_cards.pop(0)
         p2 = player2_cards.pop(0)
