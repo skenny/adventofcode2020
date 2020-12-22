@@ -31,7 +31,7 @@ def play(player1_cards, player2_cards, recursive_combat_enabled):
     return score
 
 def play_game(game_num, player1_cards, player2_cards, recursive_combat_enabled):
-    prev_rounds = []
+    prev_rounds = {}
     round_num = 0
     winner = None
 
@@ -45,7 +45,7 @@ def play_game(game_num, player1_cards, player2_cards, recursive_combat_enabled):
             if round_state in prev_rounds:
                 #print("Deck state repeats previous round, instant win for player 1!")
                 return (1, player1_cards)
-            prev_rounds.append(round_state)
+            prev_rounds[round_state] = True
 
         #print("-- Round {} (Game {}) --".format(round_num, game_num))
         #print("Player 1's deck: {}".format(", ".join(str(c) for c in player1_cards)))
