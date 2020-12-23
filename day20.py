@@ -7,14 +7,7 @@ class Tile:
         self.id = id
         self.rows = rows
         self.dimensions = len(rows)
-        self.top_neighbour = None
-        self.right_neighbour = None
-        self.bottom_neighbour = None
-        self.left_neighbour = None
         self.neighbours = set()
-
-    def __repr__(self):
-        return str(self.id)
 
     def print(self):
         print("\n".join(self.rows))
@@ -29,13 +22,13 @@ class Tile:
         return self.rows[0]
 
     def right_edge(self):
-        return "".join(list(map(lambda row: row[-1], self.rows)))
+        return "".join([row[-1] for row in self.rows])
 
     def bottom_edge(self):
         return self.rows[-1]
 
     def left_edge(self):
-        return "".join(list(map(lambda row: row[0], self.rows)))
+        return "".join([row[0] for row in self.rows])
 
     def reverse_edge(self, edge):
         return edge[::-1]
@@ -71,7 +64,7 @@ class Tile:
         return attachable_neighbour_edges
 
     def flip_horizontal(self):
-        self.rows = list(map(lambda row: self.reverse_edge(row), self.rows))
+        self.rows = [self.reverse_edge(row) for row in self.rows]
 
     def flip_vertical(self):
         self.rows = list(reversed(self.rows))
@@ -127,15 +120,14 @@ def find_corners(tiles):
 
 def arrange_tiles(tiles):
     dimensions = int(math.sqrt(len(tiles)))
-    corners = find_corners(tiles)
-    unplaced_tile_ids = list(map(lambda tile: tile.id, tiles))
+    unplaced_tile_ids = [tile.id for tile in tiles]
 
     image = []
     for i in range(dimensions):
         image.append([None] * dimensions)
 
     # select a cornerstone and orient it so that it's the top left
-    cornerstone = corners[0]
+    cornerstone = find_corners(tiles)[0]
     while True:
         neighbour_edges = cornerstone.find_neighbour_edges()
         if "right" in neighbour_edges and "bottom" in neighbour_edges:
@@ -147,6 +139,7 @@ def arrange_tiles(tiles):
 
     # place the cornerstone
     image[0][0] = cornerstone
+    unplaced_tile_ids.remove(cornerstone.id)
 
     for y in range(0, dimensions):
         for x in range(0, dimensions):
@@ -159,13 +152,11 @@ def arrange_tiles(tiles):
             target_edge = prev_tile.right_edge() if attaching_right else prev_tile.bottom_edge()
             matching_tile = None
 
-            #print("checking", x, y, prev_tile, target_edge)
-
             for neighbour_tile in prev_tile.neighbours:
-                #print("\tchecking neighbour", neighbour_tile)
+                if neighbour_tile.id not in unplaced_tile_ids:
+                    continue
 
                 if target_edge == neighbour_tile.top_edge():
-                    #print("\t\t1")
                     if attaching_right:
                         neighbour_tile.flip_horizontal()
                         neighbour_tile.rotate(3)
@@ -173,7 +164,6 @@ def arrange_tiles(tiles):
                     break
 
                 if target_edge == neighbour_tile.reverse_edge(neighbour_tile.top_edge()):
-                    #print("\t\t2")
                     if attaching_right:
                         neighbour_tile.rotate(3)
                     else:
@@ -182,15 +172,14 @@ def arrange_tiles(tiles):
                     break
 
                 if target_edge == neighbour_tile.right_edge():
-                    #print("\t\t3")
                     if attaching_right:
                         neighbour_tile.flip_horizontal()
                     else:
                         neighbour_tile.rotate(3)
                     matching_tile = neighbour_tile
                     break
+
                 if target_edge == neighbour_tile.reverse_edge(neighbour_tile.right_edge()):
-                    #print("\t\t4")
                     if attaching_right:
                         neighbour_tile.flip_vertical()
                         neighbour_tile.flip_horizontal()
@@ -201,7 +190,6 @@ def arrange_tiles(tiles):
                     break
 
                 if target_edge == neighbour_tile.bottom_edge():
-                    #print("\t\t5")
                     if attaching_right:
                         neighbour_tile.rotate(1)
                     else:
@@ -210,8 +198,6 @@ def arrange_tiles(tiles):
                     break
 
                 if target_edge == neighbour_tile.reverse_edge(neighbour_tile.bottom_edge()):
-                    #print("\t\t6")
-                    # aka rotate(2)
                     if attaching_right:
                         neighbour_tile.rotate(1)
                         neighbour_tile.flip_vertical()
@@ -220,8 +206,8 @@ def arrange_tiles(tiles):
                         neighbour_tile.flip_horizontal()
                     matching_tile = neighbour_tile
                     break
+
                 if target_edge == neighbour_tile.left_edge():
-                    #print("\t\t7")
                     if not attaching_right:
                         neighbour_tile.flip_vertical()
                         neighbour_tile.rotate(1)
@@ -229,7 +215,6 @@ def arrange_tiles(tiles):
                     break
 
                 if target_edge == neighbour_tile.reverse_edge(neighbour_tile.left_edge()):
-                    #print("\t\t8")
                     if attaching_right:
                         neighbour_tile.flip_vertical()
                     else:
@@ -237,8 +222,8 @@ def arrange_tiles(tiles):
                     matching_tile = neighbour_tile
                     break
 
-            #print("\tfound match", matching_tile)
             image[y][x] = matching_tile
+            unplaced_tile_ids.remove(matching_tile.id)
     
     return image
 
@@ -289,10 +274,9 @@ def search_for_sea_monsters(image):
 
     num_sea_monsters_spotted = 0
 
-    while True:
-        print("searching for sea monsters...")
-        raster_tile.print()
+    print("Searching for sea monsters...")
 
+    while True:
         for y in range(y_max):
             for x in range(x_max):
                 sea_monsters_spotted = True
@@ -302,7 +286,7 @@ def search_for_sea_monsters(image):
                     sea_monsters_spotted = False
                     break
                 if sea_monsters_spotted:
-                    print("sea monster spotted at ({}, {})!".format(y, x))
+                    print("Sea monster spotted at ({}, {})!".format(y, x))
                     num_sea_monsters_spotted += 1
 
         if num_sea_monsters_spotted > 0:
@@ -322,7 +306,7 @@ def search_for_sea_monsters(image):
         rotations += 1
         print("rotated {} times".format(rotations))
 
-    print("spotted {} sea monsters!!!".format(num_sea_monsters_spotted))
+    print("Spotted {} sea monsters!!!".format(num_sea_monsters_spotted))
     raster_tile.print()
 
     water_roughness = sum([row.count("#") for row in raster_tile.rows]) - (num_sea_monsters_spotted * len(monster_mask_vectors))
@@ -339,5 +323,5 @@ def run(label, input_file):
 
     print("{} 2: {}".format(label, water_roughness))
 
-run("test", "day20-input-test")
-#run("part", "day20-input")
+#run("test", "day20-input-test")
+run("part", "day20-input")
