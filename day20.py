@@ -293,14 +293,12 @@ def search_for_sea_monsters(image):
 
         if rotations % 4 == 0:
             if not flipped:
-                print("flipping")
                 raster_tile.flip_horizontal()
             else:
                 break
 
         raster_tile.rotate(1)
         rotations += 1
-        print("rotated {} times".format(rotations))
 
     num_sea_monsters_spotted = len(monster_coords)
     reveal_sea_monsters(raster_tile, monster_coords, monster_mask)
