@@ -306,7 +306,7 @@ def search_for_sea_monsters(image):
     print("Spotted {} sea monsters!!!".format(num_sea_monsters_spotted))
     raster_tile.print()
 
-    water_roughness = sum([row.count("#") for row in raster_tile.rows]) - (num_sea_monsters_spotted * len(monster_mask))
+    water_roughness = sum([row.count("#") for row in raster_tile.rows])
     return water_roughness
 
 def reveal_sea_monsters(tile, monster_coords, monster_mask):
@@ -326,4 +326,4 @@ def run(label, input_file):
     print("{} 2: {}".format(label, water_roughness))
 
 run("test", "day20-input-test")
-#run("part", "day20-input")
+run("part", "day20-input")
