@@ -257,7 +257,7 @@ def search_for_sea_monsters(image):
     2  #  #  #  #  #  #   
       01234567890123456789
     '''''''''''''''''''''''
-    monster_mask_vectors = [
+    monster_mask = [
         (0, 18),
         (1, 0), (1, 5), (1, 6), (1, 11), (1, 12), (1, 17), (1, 18), (1, 19),
         (2, 1), (2, 4), (2, 7), (2, 10), (2, 13), (2, 16)
@@ -269,10 +269,9 @@ def search_for_sea_monsters(image):
     x_max = len(raster_tile.rows[0]) - 20
 
     rotations = 0
-    flipped_horizontal = False
-    flipped_vertical = False
+    flipped = False
 
-    num_sea_monsters_spotted = 0
+    monster_coords = []
 
     print("Searching for sea monsters...")
 
@@ -280,25 +279,22 @@ def search_for_sea_monsters(image):
         for y in range(y_max):
             for x in range(x_max):
                 sea_monsters_spotted = True
-                for yo, xo in monster_mask_vectors:
+                for yo, xo in monster_mask:
                     if raster_tile.rows[y + yo][x + xo] == "#":
                         continue
                     sea_monsters_spotted = False
                     break
                 if sea_monsters_spotted:
                     print("Sea monster spotted at ({}, {})!".format(y, x))
-                    num_sea_monsters_spotted += 1
+                    monster_coords.append((y, x))
 
-        if num_sea_monsters_spotted > 0:
+        if len(monster_coords) > 0:
             break
 
         if rotations % 4 == 0:
-            if not flipped_horizontal:
-                print("flipping horizontal")
+            if not flipped:
+                print("flipping")
                 raster_tile.flip_horizontal()
-            elif not flipped_vertical:
-                print("flipping vertical")
-                raster_tile.flip_vertical()
             else:
                 break
 
@@ -306,11 +302,19 @@ def search_for_sea_monsters(image):
         rotations += 1
         print("rotated {} times".format(rotations))
 
+    num_sea_monsters_spotted = len(monster_coords)
+    reveal_sea_monsters(raster_tile, monster_coords, monster_mask)
+
     print("Spotted {} sea monsters!!!".format(num_sea_monsters_spotted))
     raster_tile.print()
 
-    water_roughness = sum([row.count("#") for row in raster_tile.rows]) - (num_sea_monsters_spotted * len(monster_mask_vectors))
+    water_roughness = sum([row.count("#") for row in raster_tile.rows]) - (num_sea_monsters_spotted * len(monster_mask))
     return water_roughness
+
+def reveal_sea_monsters(tile, monster_coords, monster_mask):
+    for y, x in monster_coords:
+        for yo, xo in monster_mask:
+            tile.set_pixel(y + yo, x + xo, "O")
 
 def run(label, input_file):
     tiles = read_input(input_file)
@@ -323,5 +327,5 @@ def run(label, input_file):
 
     print("{} 2: {}".format(label, water_roughness))
 
-#run("test", "day20-input-test")
-run("part", "day20-input")
+run("test", "day20-input-test")
+#run("part", "day20-input")
