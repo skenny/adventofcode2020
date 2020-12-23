@@ -16,6 +16,9 @@ class Tile:
     def __repr__(self):
         return str(self.id)
 
+    def print(self):
+        print("\n".join(self.rows))
+
     def is_corner(self):
         return len(self.neighbours) == 2
 
@@ -89,6 +92,11 @@ class Tile:
             result.append(row[1:len(row) - 1])
         return result
 
+    def set_pixel(self, y, x, v):
+        row = list(self.rows[y])
+        row[x] = v
+        self.rows[y] = "".join(row)
+
 def read_input(file):
     with open(file, "r") as fin:
         lines = [l.strip() for l in fin.readlines()]
@@ -96,6 +104,7 @@ def read_input(file):
         tile_rows = None
         tiles = []
         for line in lines:
+
             if len(line) == 0:
                 continue
             if line.startswith("Tile "):
@@ -151,110 +160,108 @@ def arrange_tiles(tiles):
             # TODO review orientation adjustments, fixed one bug with right edge match and bottom, reversed original orientation
             if x == 0:
                 target_edge = prev_tile.bottom_edge()
-                print("checking", x, y, prev_tile, target_edge)
+                #print("checking", x, y, prev_tile, target_edge)
 
                 matching_tile = None
                 for neighbour_tile in prev_tile.neighbours:
-                    print("\tchecking neighbour", neighbour_tile)
+                    #print("\tchecking neighbour", neighbour_tile)
 
                     if target_edge == neighbour_tile.top_edge():
-                        print("\t\ttop, regular")
+                        #print("\t\ttop, regular")
                         matching_tile = neighbour_tile
                         break
                     if target_edge == neighbour_tile.reverse_edge(neighbour_tile.top_edge()):
-                        print("\t\ttop, reversed")
+                        #print("\t\ttop, reversed")
                         neighbour_tile.flip_horizontal()
                         matching_tile = neighbour_tile
                         break
                     if target_edge == neighbour_tile.right_edge():
-                        print("\t\tright, regular")
+                        #print("\t\tright, regular")
                         neighbour_tile.rotate(3)
                         matching_tile = neighbour_tile
                         break
                     if target_edge == neighbour_tile.reverse_edge(neighbour_tile.right_edge()):
-                        print("\t\tright, reversed")
+                        #print("\t\tright, reversed")
                         neighbour_tile.flip_vertical()
                         neighbour_tile.rotate(3)
                         matching_tile = neighbour_tile
                         break
                     if target_edge == neighbour_tile.bottom_edge():
-                        print("\t\tbottom, regular")
+                        #print("\t\tbottom, regular")
                         neighbour_tile.flip_vertical()
                         matching_tile = neighbour_tile
                         break
                     if target_edge == neighbour_tile.reverse_edge(neighbour_tile.bottom_edge()):
-                        print("\t\tbottom, reversed")
+                        #print("\t\tbottom, reversed")
                         # aka rotate(2)
                         neighbour_tile.flip_vertical()
                         neighbour_tile.flip_horizontal()
                         matching_tile = neighbour_tile
                         break
                     if target_edge == neighbour_tile.left_edge():
-                        print("\t\tleft, regular")
+                        #print("\t\tleft, regular")
                         neighbour_tile.flip_vertical()
                         neighbour_tile.rotate(1)
                         matching_tile = neighbour_tile
                         break
                     if target_edge == neighbour_tile.reverse_edge(neighbour_tile.left_edge()):
-                        print("\t\tleft, reversed")
+                        #print("\t\tleft, reversed")
                         neighbour_tile.rotate(1)
                         matching_tile = neighbour_tile
                         break
 
-                print("\tfound match", matching_tile)
+                #print("\tfound match", matching_tile)
             else:
                 target_edge = prev_tile.right_edge()
-                print("checking", x, y, prev_tile, target_edge)
+                #print("checking", x, y, prev_tile, target_edge)
 
                 matching_tile = None
                 for neighbour_tile in prev_tile.neighbours:
-                    print("\tchecking neighbour", neighbour_tile)
+                    #print("\tchecking neighbour", neighbour_tile)
 
                     if target_edge == neighbour_tile.top_edge():
-                        print("\t\ttop, regular")
+                        #print("\t\ttop, regular")
                         neighbour_tile.flip_horizontal()
                         neighbour_tile.rotate(3)
                         matching_tile = neighbour_tile
                         break
                     if target_edge == neighbour_tile.reverse_edge(neighbour_tile.top_edge()):
-                        print("\t\ttop, reversed")
+                        #print("\t\ttop, reversed")
                         neighbour_tile.rotate(3)
                         matching_tile = neighbour_tile
                         break
                     if target_edge == neighbour_tile.right_edge():
-                        print("\t\tright, regular")
+                        #print("\t\tright, regular")
                         neighbour_tile.flip_horizontal()
                         matching_tile = neighbour_tile
                         break
                     if target_edge == neighbour_tile.reverse_edge(neighbour_tile.right_edge()):
-                        print("\t\tright, reversed")
+                        #print("\t\tright, reversed")
                         neighbour_tile.flip_vertical()
                         neighbour_tile.flip_horizontal()
                         matching_tile = neighbour_tile
                         break
                     if target_edge == neighbour_tile.bottom_edge():
-                        print("\t\tbottom, regular")
+                        #print("\t\tbottom, regular")
                         neighbour_tile.rotate(1)
                         matching_tile = neighbour_tile
                         break
                     if target_edge == neighbour_tile.reverse_edge(neighbour_tile.bottom_edge()):
-                        print("\t\tbottom, reversed")
+                        #print("\t\tbottom, reversed")
                         neighbour_tile.rotate(1)
                         neighbour_tile.flip_vertical()
                         matching_tile = neighbour_tile
                         break
                     if target_edge == neighbour_tile.left_edge():
-                        print("\t\tleft, regular")
+                        #print("\t\tleft, regular")
                         matching_tile = neighbour_tile
                         break
                     if target_edge == neighbour_tile.reverse_edge(neighbour_tile.left_edge()):
-                        print("\t\tleft, reversed")
+                        #print("\t\tleft, reversed")
                         neighbour_tile.flip_vertical()
                         matching_tile = neighbour_tile
                         break
-
-                print("\tfound match", matching_tile)
-
+                #print("\tfound match", matching_tile)
             image[y][x] = matching_tile
     
     return image
@@ -280,8 +287,70 @@ def rasterize(image):
                 raster_line += tile[i]
             raster_lines.append(raster_line)
 
-    print("\n".join(raster_lines))
-    return raster_lines
+    return Tile("raster", raster_lines)
+
+def search_for_sea_monsters(image):
+    '''''''''''''''''''''''
+    0                   # 
+    1 #    ##    ##    ###
+    2  #  #  #  #  #  #   
+      01234567890123456789
+    '''''''''''''''''''''''
+    monster_mask_vectors = [
+        (0, 18),
+        (1, 0), (1, 5), (1, 6), (1, 11), (1, 12), (1, 17), (1, 18), (1, 19),
+        (2, 1), (2, 4), (2, 7), (2, 10), (2, 13), (2, 16)
+    ]
+
+    raster_tile = rasterize(image)
+
+    y_max = len(raster_tile.rows) - 2
+    x_max = len(raster_tile.rows[0]) - 20
+
+    rotations = 0
+    flipped_horizontal = False
+    flipped_vertical = False
+
+    num_sea_monsters_spotted = 0
+
+    while True:
+        print("searching for sea monsters...")
+        raster_tile.print()
+
+        for y in range(y_max):
+            for x in range(x_max):
+                sea_monsters_spotted = True
+                for yo, xo in monster_mask_vectors:
+                    if raster_tile.rows[y + yo][x + xo] == "#":
+                        continue
+                    sea_monsters_spotted = False
+                    break
+                if sea_monsters_spotted:
+                    print("sea monster spotted at ({}, {})!".format(y, x))
+                    num_sea_monsters_spotted += 1
+
+        if num_sea_monsters_spotted > 0:
+            break
+
+        if rotations % 4 == 0:
+            if not flipped_horizontal:
+                print("flipping horizontal")
+                raster_tile.flip_horizontal()
+            elif not flipped_vertical:
+                print("flipping vertical")
+                raster_tile.flip_vertical()
+            else:
+                break
+
+        raster_tile.rotate(1)
+        rotations += 1
+        print("rotated {} times".format(rotations))
+
+    print("spotted {} sea monsters!!!".format(num_sea_monsters_spotted))
+    raster_tile.print()
+
+    water_roughness = sum([row.count("#") for row in raster_tile.rows]) - (num_sea_monsters_spotted * len(monster_mask_vectors))
+    return water_roughness
 
 def run(label, input_file):
     tiles = read_input(input_file)
@@ -290,7 +359,9 @@ def run(label, input_file):
     print("{} 1: {}".format(label, reduce(lambda total, tile: total * tile.id, find_corners(tiles), 1)))
     
     image = arrange_tiles(tiles)
-    raster_lines = rasterize(image)
+    water_roughness = search_for_sea_monsters(image)
 
-run("test", "day20-input-test")
-#run("part", "day20-input")
+    print("{} 2: {}".format(label, water_roughness))
+
+#run("test", "day20-input-test")
+run("part", "day20-input")
