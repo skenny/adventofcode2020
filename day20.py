@@ -44,28 +44,28 @@ class Tile:
                 self.neighbours.add(other_tile)
 
     def find_neighbour_edges(self):
-        aaa = []
+        attachable_neighbour_edges = []
+
         for neighbour in self.neighbours:
             neighbour_edges = neighbour.edges()
 
             right = self.right_edge()
             if right in neighbour_edges or self.reverse_edge(right) in neighbour_edges:
-                aaa.append("right")
+                attachable_neighbour_edges.append("right")
 
             left = self.left_edge()
             if left in neighbour_edges or self.reverse_edge(left) in neighbour_edges:
-                aaa.append("left")
+                attachable_neighbour_edges.append("left")
 
             top = self.top_edge()
             if top in neighbour_edges or self.reverse_edge(top) in neighbour_edges:
-                aaa.append("top")
+                attachable_neighbour_edges.append("top")
 
             bottom = self.bottom_edge()
             if bottom in neighbour_edges or self.reverse_edge(bottom) in neighbour_edges:
-                aaa.append("bottom")
+                attachable_neighbour_edges.append("bottom")
 
-        print("tile", self.id, "neighbour edges are", aaa)
-        return aaa
+        return attachable_neighbour_edges
 
     def flip_horizontal(self):
         self.rows = list(map(lambda row: self.reverse_edge(row), self.rows))
@@ -82,6 +82,12 @@ class Tile:
                     row += self.rows[j][i]
                 new_rows.append(row)
             self.rows = new_rows
+
+    def remove_borders(self):
+        result = []
+        for row in self.rows[1:len(self.rows) - 1]:
+            result.append(row[1:len(row) - 1])
+        return result
 
 def read_input(file):
     with open(file, "r") as fin:
@@ -131,8 +137,6 @@ def arrange_tiles(tiles):
             break
         cornerstone.rotate(1)
 
-    print("oriented correctly!")
-    
     image[0][0] = cornerstone
 
     for y in range(0, dimensions):
@@ -143,6 +147,8 @@ def arrange_tiles(tiles):
 
             prev_tile = image[y - 1][x] if x == 0 else image[y][x - 1]
 
+            # LOL
+            # TODO review orientation adjustments, fixed one bug with right edge match and bottom, reversed original orientation
             if x == 0:
                 target_edge = prev_tile.bottom_edge()
                 print("checking", x, y, prev_tile, target_edge)
@@ -233,8 +239,8 @@ def arrange_tiles(tiles):
                         break
                     if target_edge == neighbour_tile.reverse_edge(neighbour_tile.bottom_edge()):
                         print("\t\tbottom, reversed")
-                        neighbour_tile.flip_vertical()
                         neighbour_tile.rotate(1)
+                        neighbour_tile.flip_vertical()
                         matching_tile = neighbour_tile
                         break
                     if target_edge == neighbour_tile.left_edge():
@@ -250,15 +256,41 @@ def arrange_tiles(tiles):
                 print("\tfound match", matching_tile)
 
             image[y][x] = matching_tile
-        print(image)
-    # TODO
+    
+    return image
+
+def rasterize(image):
+    dimensions = len(image)
+
+    image_without_borders = []
+    for i in range(dimensions):
+        image_without_borders.append([None] * dimensions)
+
+    for y, row in enumerate(image):
+        for x, tile in enumerate(row):
+            image_without_borders[y][x] = tile.remove_borders()
+
+    tile_dimensions = len(image_without_borders[0][0])
+
+    raster_lines = []
+    for row in image_without_borders:
+        for i in range(0, tile_dimensions):
+            raster_line = ""
+            for tile in row:
+                raster_line += tile[i]
+            raster_lines.append(raster_line)
+
+    print("\n".join(raster_lines))
+    return raster_lines
 
 def run(label, input_file):
     tiles = read_input(input_file)
     test_fit_tiles(tiles)
 
     print("{} 1: {}".format(label, reduce(lambda total, tile: total * tile.id, find_corners(tiles), 1)))
-    arrange_tiles(tiles)
+    
+    image = arrange_tiles(tiles)
+    raster_lines = rasterize(image)
 
 run("test", "day20-input-test")
 #run("part", "day20-input")
