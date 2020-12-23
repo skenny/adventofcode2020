@@ -104,7 +104,6 @@ def read_input(file):
         tile_rows = None
         tiles = []
         for line in lines:
-
             if len(line) == 0:
                 continue
             if line.startswith("Tile "):
@@ -135,7 +134,7 @@ def arrange_tiles(tiles):
     for i in range(dimensions):
         image.append([None] * dimensions)
 
-    # place a cornerstone
+    # select a cornerstone and orient it so that it's the top left
     cornerstone = corners[0]
     while True:
         neighbour_edges = cornerstone.find_neighbour_edges()
@@ -146,6 +145,7 @@ def arrange_tiles(tiles):
             break
         cornerstone.rotate(1)
 
+    # place the cornerstone
     image[0][0] = cornerstone
 
     for y in range(0, dimensions):
@@ -155,113 +155,89 @@ def arrange_tiles(tiles):
                 continue
 
             prev_tile = image[y - 1][x] if x == 0 else image[y][x - 1]
+            attaching_right = x != 0
+            target_edge = prev_tile.right_edge() if attaching_right else prev_tile.bottom_edge()
+            matching_tile = None
 
-            # LOL
-            # TODO review orientation adjustments, fixed one bug with right edge match and bottom, reversed original orientation
-            if x == 0:
-                target_edge = prev_tile.bottom_edge()
-                #print("checking", x, y, prev_tile, target_edge)
+            #print("checking", x, y, prev_tile, target_edge)
 
-                matching_tile = None
-                for neighbour_tile in prev_tile.neighbours:
-                    #print("\tchecking neighbour", neighbour_tile)
+            for neighbour_tile in prev_tile.neighbours:
+                #print("\tchecking neighbour", neighbour_tile)
 
-                    if target_edge == neighbour_tile.top_edge():
-                        #print("\t\ttop, regular")
-                        matching_tile = neighbour_tile
-                        break
-                    if target_edge == neighbour_tile.reverse_edge(neighbour_tile.top_edge()):
-                        #print("\t\ttop, reversed")
-                        neighbour_tile.flip_horizontal()
-                        matching_tile = neighbour_tile
-                        break
-                    if target_edge == neighbour_tile.right_edge():
-                        #print("\t\tright, regular")
-                        neighbour_tile.rotate(3)
-                        matching_tile = neighbour_tile
-                        break
-                    if target_edge == neighbour_tile.reverse_edge(neighbour_tile.right_edge()):
-                        #print("\t\tright, reversed")
-                        neighbour_tile.flip_vertical()
-                        neighbour_tile.rotate(3)
-                        matching_tile = neighbour_tile
-                        break
-                    if target_edge == neighbour_tile.bottom_edge():
-                        #print("\t\tbottom, regular")
-                        neighbour_tile.flip_vertical()
-                        matching_tile = neighbour_tile
-                        break
-                    if target_edge == neighbour_tile.reverse_edge(neighbour_tile.bottom_edge()):
-                        #print("\t\tbottom, reversed")
-                        # aka rotate(2)
-                        neighbour_tile.flip_vertical()
-                        neighbour_tile.flip_horizontal()
-                        matching_tile = neighbour_tile
-                        break
-                    if target_edge == neighbour_tile.left_edge():
-                        #print("\t\tleft, regular")
-                        neighbour_tile.flip_vertical()
-                        neighbour_tile.rotate(1)
-                        matching_tile = neighbour_tile
-                        break
-                    if target_edge == neighbour_tile.reverse_edge(neighbour_tile.left_edge()):
-                        #print("\t\tleft, reversed")
-                        neighbour_tile.rotate(1)
-                        matching_tile = neighbour_tile
-                        break
-
-                #print("\tfound match", matching_tile)
-            else:
-                target_edge = prev_tile.right_edge()
-                #print("checking", x, y, prev_tile, target_edge)
-
-                matching_tile = None
-                for neighbour_tile in prev_tile.neighbours:
-                    #print("\tchecking neighbour", neighbour_tile)
-
-                    if target_edge == neighbour_tile.top_edge():
-                        #print("\t\ttop, regular")
+                if target_edge == neighbour_tile.top_edge():
+                    #print("\t\t1")
+                    if attaching_right:
                         neighbour_tile.flip_horizontal()
                         neighbour_tile.rotate(3)
-                        matching_tile = neighbour_tile
-                        break
-                    if target_edge == neighbour_tile.reverse_edge(neighbour_tile.top_edge()):
-                        #print("\t\ttop, reversed")
+                    matching_tile = neighbour_tile
+                    break
+
+                if target_edge == neighbour_tile.reverse_edge(neighbour_tile.top_edge()):
+                    #print("\t\t2")
+                    if attaching_right:
                         neighbour_tile.rotate(3)
-                        matching_tile = neighbour_tile
-                        break
-                    if target_edge == neighbour_tile.right_edge():
-                        #print("\t\tright, regular")
+                    else:
                         neighbour_tile.flip_horizontal()
-                        matching_tile = neighbour_tile
-                        break
-                    if target_edge == neighbour_tile.reverse_edge(neighbour_tile.right_edge()):
-                        #print("\t\tright, reversed")
+                    matching_tile = neighbour_tile
+                    break
+
+                if target_edge == neighbour_tile.right_edge():
+                    #print("\t\t3")
+                    if attaching_right:
+                        neighbour_tile.flip_horizontal()
+                    else:
+                        neighbour_tile.rotate(3)
+                    matching_tile = neighbour_tile
+                    break
+                if target_edge == neighbour_tile.reverse_edge(neighbour_tile.right_edge()):
+                    #print("\t\t4")
+                    if attaching_right:
                         neighbour_tile.flip_vertical()
                         neighbour_tile.flip_horizontal()
-                        matching_tile = neighbour_tile
-                        break
-                    if target_edge == neighbour_tile.bottom_edge():
-                        #print("\t\tbottom, regular")
+                    else:
+                        neighbour_tile.flip_vertical()
+                        neighbour_tile.rotate(3)
+                    matching_tile = neighbour_tile
+                    break
+
+                if target_edge == neighbour_tile.bottom_edge():
+                    #print("\t\t5")
+                    if attaching_right:
                         neighbour_tile.rotate(1)
-                        matching_tile = neighbour_tile
-                        break
-                    if target_edge == neighbour_tile.reverse_edge(neighbour_tile.bottom_edge()):
-                        #print("\t\tbottom, reversed")
+                    else:
+                        neighbour_tile.flip_vertical()
+                    matching_tile = neighbour_tile
+                    break
+
+                if target_edge == neighbour_tile.reverse_edge(neighbour_tile.bottom_edge()):
+                    #print("\t\t6")
+                    # aka rotate(2)
+                    if attaching_right:
                         neighbour_tile.rotate(1)
                         neighbour_tile.flip_vertical()
-                        matching_tile = neighbour_tile
-                        break
-                    if target_edge == neighbour_tile.left_edge():
-                        #print("\t\tleft, regular")
-                        matching_tile = neighbour_tile
-                        break
-                    if target_edge == neighbour_tile.reverse_edge(neighbour_tile.left_edge()):
-                        #print("\t\tleft, reversed")
+                    else:
                         neighbour_tile.flip_vertical()
-                        matching_tile = neighbour_tile
-                        break
-                #print("\tfound match", matching_tile)
+                        neighbour_tile.flip_horizontal()
+                    matching_tile = neighbour_tile
+                    break
+                if target_edge == neighbour_tile.left_edge():
+                    #print("\t\t7")
+                    if not attaching_right:
+                        neighbour_tile.flip_vertical()
+                        neighbour_tile.rotate(1)
+                    matching_tile = neighbour_tile
+                    break
+
+                if target_edge == neighbour_tile.reverse_edge(neighbour_tile.left_edge()):
+                    #print("\t\t8")
+                    if attaching_right:
+                        neighbour_tile.flip_vertical()
+                    else:
+                        neighbour_tile.rotate(1)
+                    matching_tile = neighbour_tile
+                    break
+
+            #print("\tfound match", matching_tile)
             image[y][x] = matching_tile
     
     return image
@@ -363,5 +339,5 @@ def run(label, input_file):
 
     print("{} 2: {}".format(label, water_roughness))
 
-#run("test", "day20-input-test")
-run("part", "day20-input")
+run("test", "day20-input-test")
+#run("part", "day20-input")
