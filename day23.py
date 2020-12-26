@@ -43,12 +43,34 @@ class circular_linked_list:
         after.next = node
         self.node_refs_by_value[node.value] = node
 
+    def reattach_nodes(self, nodes, after):
+        first_node = nodes[0]
+        last_node = nodes[-1]
+
+        first_node.prev = after
+        last_node.next = after.next
+        last_node.next.prev = last_node
+        after.next = first_node
+
     def remove_node(self, node):
         node.prev.next = node.next
         node.next.prev = node.prev
         if self.current == node:
             self.current = node.next
         return node
+
+    def remove_next_n_nodes(self, n):
+        removed_nodes = []
+
+        this_current = self.current
+        for i in range(n):
+            removed_nodes.append(this_current.next)
+            this_current = this_current.next
+
+        self.current.next = removed_nodes[-1].next
+        self.current.next.prev = self.current
+
+        return removed_nodes
 
     def find(self, value):
         if value in self.node_refs_by_value:
@@ -87,24 +109,20 @@ def play(cup_nums, num_turns):
     min_cup = min(cup_nums)
     max_cup = max(cup_nums)
 
-    logging.debug("playing with {} cups (min={}, max={})".format(len(cup_nums), min_cup, max_cup))
+    #logging.debug("playing with {} cups (min={}, max={})".format(len(cup_nums), min_cup, max_cup))
 
     cups = circular_linked_list(cup_nums)
 
     for turn in range(1, num_turns + 1):
-        logging.debug("-- move {} --".format(turn))
+        #logging.debug("-- move {} --".format(turn))
         #logging.debug("cups:  {}".format(cups))
 
         current_cup = cups.current
         
-        next_3_nodes = []
-        next_3_values = []
-        for i in range(3):
-            removed_node = cups.remove_node(current_cup.next)
-            next_3_nodes.append(removed_node)
-            next_3_values.append(removed_node.value)
+        next_3_nodes = cups.remove_next_n_nodes(3)
+        next_3_values = [n.value for n in next_3_nodes]
         
-        logging.debug("pick up: {}".format(", ".join([str(n) for n in next_3_nodes])))
+        #logging.debug("pick up: {}".format(", ".join([str(n) for n in next_3_nodes])))
 
         target_cup_value = current_cup.value - 1
         while True:
@@ -115,7 +133,7 @@ def play(cup_nums, num_turns):
                 continue
             break
 
-        logging.debug("destination: {}\n".format(target_cup_value))
+        #logging.debug("destination: {}\n".format(target_cup_value))
 
         target_cup = cups.find(target_cup_value)
         for i in range(3):
@@ -141,7 +159,7 @@ play([int(s) for s in list("598162734")], 100)
 start = time.time()
 many_cups = [int(s) for s in list("598162734")]
 max_cup = max(many_cups)
-for i in range(1000000 - max_cup):
+for i in range(1_000_000 - max_cup):
     many_cups.append(max_cup + i + 1)
-play(many_cups, 10000000)
+play(many_cups, 10_000_000)
 print("took {} seconds".format(time.time() - start))
